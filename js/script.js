@@ -76,7 +76,45 @@ async function procesarPokedex(pokeList) {
     document.getElementById('pokeTargets').innerHTML = pokeCard
 }
 
+// Extraer los tipos a traves del endpoint de tipos
+async function cargarTipos() {
+    const respuesta = await fetch('https://pokeapi.co/api/v2/type')
+    const datos = await respuesta.json();
 
+    // Elemento html select
+    const select = document.getElementById('selectTipo');
+
+    datos.results.forEach(tipo => {
+        const option = document.createElement('option');
+        option.value = tipo.name;
+        option.textContent = tipo.name;
+        select.appendChild(option);
+    });
+}
+
+// Extraer los pokemon de un tipo especifico
+async function listaPokemonesPorTipo(tipo) {
+    const respuesta = await fetch(`https://pokeapi.co/api/v2/type/${tipo}`)
+    const datos = await respuesta.json();
+    return datos.pokemon.map(item => item.pokemon)
+}
+
+// Evento de cambiar filtro
+const selectTipo = document.getElementById('selectTipo');
+
+selectTipo.addEventListener('change', async (e) =>{ // e acronimo de event
+    const tipoSeleccionado = e.target.value; // target se refiere al elemento que activo el evento y value a su valor.
+    // reinicio la paginacion
+    page = 1;
+
+    if (tipoSeleccionado === "Todos") {
+        init() // lista norma de pokemones con paginacion
+    } else { // si no es 'Todos' lista de tipos sin paginacion
+        const listaFiltrada = await listaPokemonesPorTipo(tipoSeleccionado);
+
+        procesarPokedex(listaFiltrada)
+    }
+})
 
 
 // Funcion para iniciar todo
@@ -88,4 +126,5 @@ async function init() {
     }
 }
 
+cargarTipos();
 init()
