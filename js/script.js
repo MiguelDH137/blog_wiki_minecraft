@@ -1,7 +1,7 @@
 // ======= variables globales ======= //
 let todosLosPokemones = []; // Arreglo para guardar la lista completa de la API
 let pokemonesFiltrados = []; // Copia del arreglo original para filtros y paginacion
-const limitePokemon = 1000;
+const limitePokemon = 500;
 
 // variables de paginacion
 let pagina = 1; // pagina actual
