@@ -7,9 +7,19 @@
 }
 
 body {
-    background-color: #F8FAFC; /* Blanco opaco / Gris claro suave */
+    background-color: #C2C2C2; /* Blanco opaco / Gris claro suave */
     color: #000000;            /* Texto oscuro principal */
     min-height: 100vh;
+}
+
+/* estilo modo oscuro */
+.darkBody {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+.darkNav {
+    background-color: #0072a7;
 }
 
 .layout-container {
@@ -24,12 +34,12 @@ body {
 /* --- CONTENEDOR HEADER --- */
 .header {
     display: flex;
-    justify-content: space-between; /* Empuja logo a la izq e íconos a la der */
-    align-items: center;            /* Centra verticalmente en una sola fila */
+    justify-content: space-between;
+    align-items: center;
     padding: 10px 30px;
-    background-color: #053E66;
+    background-color: #FFFFFF;
     border-bottom: 1px solid #1e293b;
-    height: 65px;                   /* Altura fija para la barra */
+    height: 65px;
 }
 
 /* --- LOGO POKÉBOLA --- */
@@ -73,17 +83,13 @@ body {
 .btn-icon img {
     height: 22px;
     width: 22px;
-    object-fit: contain;
-    
-    /* 💡 ESTA LÍNEA VUELVE BLANCOS LOS ÍCONOS NEGROS */
-    filter: invert(0.8) brightness(1.2); 
-    
+    object-fit: contain;    
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 /* --- EFECTOS HOVER --- */
 .btn-icon:hover {
-    background-color: #1e293b;      /* Fondo sutil al pasar el cursor */
+    background-color: #1e293b;
 }
 
 .btn-icon:hover img {
@@ -104,14 +110,13 @@ body {
 
 .hero-card {
     background-color: #FFFFFF;
-    border: 2px solid #E2E8F0;
+    border: 2px solid #1e293b;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
     border-radius: 16px;
     height: 180px;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #ffffff;
     margin-bottom: 15px;
 }
 
@@ -278,8 +283,8 @@ body {
 }
 
 .paginacion button {
-    background-color: #053E66;
-    color: #ffffff;
+    background-color: #FFFFFF;
+    color: #0F172A;
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -295,11 +300,11 @@ body {
 
 /* --- 6. FOOTER --- */
 .footer {
-    background-color: #053E66;
+    background-color: #FFFFFF;
     border-top: 1px solid #1e293b;
     text-align: center;
     padding: 15px;
     font-size: 0.85rem;
-    color: #ffffff;
+    color: #0F172A;
     margin-top: auto;
 }
