@@ -1,130 +1,152 @@
-let page = 1;
+// ======= variables globales ======= //
+let todosLosPokemones = []; // Arreglo para guardar la lista completa de la API
+let pokemonesFiltrados = []; // Copia del arreglo original para filtros y paginacion
+const limitePokemon = 1351;
 
+// variables de paginacion
+let pagina = 1; // pagina actual
+const paginaLimite = 20; // limite de elementos por pagina
+
+
+// ======= Evento de paginacion =======//
 const btnSiguiente = document.getElementById('btnSiguiente');
 const btnAnterior = document.getElementById('btnAnterior');
 
+// ======= Eventos de paginacion ======= //
 btnSiguiente.addEventListener('click', () => {
-    page += 1;
-    init()
-})
+    const totalPaginas = Math.ceil(pokemonesFiltrados.length / paginaLimite);
+    if (pagina < totalPaginas) {
+        pagina += 1;
+        imprimirPokedex(); // Solo renderizamos la pagina, no llamamos a init()
+    }
+});
 
 btnAnterior.addEventListener('click', () => {
-    if (page > 1) {
-        page -= 1;
-        init()
-        
+    if (pagina > 1) {
+        pagina -= 1;
+        imprimirPokedex();
     }
-})
+});
 
-// Funncion para extraer la lista de pokemones
-const listaPokemones = async() => {
-    const limite = 20;
-    let offset = (page - 1) * limite;
-
+// ======= Funncion para extraer la lista de pokemones de la API ======= //
+const listaPokemones = async(limitePokemon) => {
     try {
         // Traer informacion de la API con GET
-        const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limite}&offset=${offset}`)
+        const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limitePokemon}&offset=0`)
         
-        // Imprime el estado de la respuesta, 200 si todo esta bien
-        console.log(respuesta.status)
-    
-        // Condicion si el estado de la respuesta es 200 procesa la informacion a JSON
-        if (respuesta.status === 200) {
-            const datosRecibidos = await respuesta.json();
+        if (!respuesta.ok) {
+            throw new Error(`Error en la llamada a la API: ${respuesta.status}`);
+            
+        }
 
-            // Imprime los datos extraidos de la API
-            console.log(datosRecibidos)
-            const pokeList = datosRecibidos.results;
-            return pokeList
+        if (respuesta.status === 200) { // Condicion si el estado de la respuesta es 200 procesa la informacion a JSON
+            const datosRecibidos = await respuesta.json(); // datos recibidos a formato json
+            console.log(datosRecibidos) // Imprime los datos extraidos de la API
+
+            const listaDetallada = await Promise.all( // nuevo arreglo con la info detallada de cada pokemon
+                datosRecibidos.results.map(async (pokemon) => { // dentro de la varible datosRecibidos buscamos la propiedad results con todos los datos
+                    const detallesRecibidos = await fetch(pokemon.url); // extraemos los detalles individuales
+                    
+                    // if (!detallesRecibidos.ok) return null; // Si falla un pokemon individual, lo omitimos
+                    
+                    const pokeDetalles = await detallesRecibidos.json(); // pasamos los detalles individuales a json
+
+                    let listaTipos = pokeDetalles.types 
+                        ? pokeDetalles.types.map(item => item.type.name)
+                        : [];
+                    
+                    return { // guardamos las propiedades necesarias
+                        id: pokeDetalles.id,
+                        name: pokeDetalles.name,
+                        image: pokeDetalles.sprites.front_default,
+                        types: listaTipos
+                    }
+                })
+            )
+            return listaDetallada.filter(pokemon => pokemon != null);
     }
         
     } catch (error) {
         
-        console.log(`error: ${error}`)
+        console.error(`Fallo en la conexion con la API: ${error}`)
+        return [];
         
     }
 }
 
-// obtener detalles individuales de los pokemones
-async function obtenerPokemonIndividual(url) {
-    const respuesta = await fetch(url);
-    return await respuesta.json();
-}
+// ======= Funcion para mostrar y limitar en el html
+function imprimirPokedex() {
+    const pokeTargets = document.getElementById('pokeTargets');
+    pokeTargets.innerHTML = '';
 
-// Unificar la informacion e inseertarla en el HTML
-async function procesarPokedex(pokeList) {
-    const listaDetallada = await Promise.all(
-        pokeList.map(pokemon => obtenerPokemonIndividual(pokemon.url))
-    );
+    // calculo para el rango de elemento que extraera slice()
+    const inicio = (pagina - 1) * paginaLimite;
+    const fin = inicio + paginaLimite;
+    const pokePagina = pokemonesFiltrados.slice(inicio, fin);
 
-    let pokeCard = ``;
-    listaDetallada.forEach(pokemon => {
-        const imgUrl = pokemon.sprites.front_default;
-
-        pokeCard += `
-
-            <div class="pokeTarjeta">
-                <img src="${imgUrl}">
-
-                <h3>${pokemon.name}</h3>
+    
+    let pokeCards = '';
+    pokePagina.forEach(pokemon => {
+        let tiposHTML = '';
+        for (const tipo of pokemon.types) {
+            tiposHTML += `<span class="pokeTipo ${tipo}">${tipo}</span>`
+        }
+        
+        pokeCards += `
+            <div>
+            <img src="${pokemon.image}" alt="imagen de ${pokemon.name}">
+            
+            <h3>N: ${pokemon.id} Nombre: ${pokemon.name}</h3>
             </div>
-
+            <div class="typesLine">
+                ${tiposHTML}
+            </div>
         `
-
-    });
-
-    document.getElementById('pokeTargets').innerHTML = pokeCard
+    })
+    pokeTargets.innerHTML = pokeCards;
 }
 
-// Extraer los tipos a traves del endpoint de tipos
-async function cargarTipos() {
-    const respuesta = await fetch('https://pokeapi.co/api/v2/type')
-    const datos = await respuesta.json();
-
-    // Elemento html select
-    const select = document.getElementById('selectTipo');
-
-    datos.results.forEach(tipo => {
-        const option = document.createElement('option');
-        option.value = tipo.name;
-        option.textContent = tipo.name;
-        select.appendChild(option);
-    });
-}
-
-// Extraer los pokemon de un tipo especifico
-async function listaPokemonesPorTipo(tipo) {
-    const respuesta = await fetch(`https://pokeapi.co/api/v2/type/${tipo}`)
-    const datos = await respuesta.json();
-    return datos.pokemon.map(item => item.pokemon)
-}
-
-// Evento de cambiar filtro
+// Evento para filtrar
 const selectTipo = document.getElementById('selectTipo');
-
-selectTipo.addEventListener('change', async (e) =>{ // e acronimo de event
-    const tipoSeleccionado = e.target.value; // target se refiere al elemento que activo el evento y value a su valor.
-    // reinicio la paginacion
-    page = 1;
-
-    if (tipoSeleccionado === "Todos") {
-        init() // lista norma de pokemones con paginacion
-    } else { // si no es 'Todos' lista de tipos sin paginacion
-        const listaFiltrada = await listaPokemonesPorTipo(tipoSeleccionado);
-
-        procesarPokedex(listaFiltrada)
+selectTipo.addEventListener('change', (e) => {
+    const tipoSeleccionado = e.target.value;
+    pagina = 1;
+    
+    if (tipoSeleccionado === 'Todos') {
+        pokemonesFiltrados = [...todosLosPokemones];
+    } else {
+        pokemonesFiltrados = todosLosPokemones.filter(pokemon => pokemon.types.includes(tipoSeleccionado));
     }
+
+    imprimirPokedex();
 })
 
+// ======= Funcion para extraer tipos del endpoint ======= //
+async function extraerTipos() {
+    try {
+        const respuesta = await fetch(`https://pokeapi.co/api/v2/type`);
+        const datosRecibidos = await respuesta.json();
 
-// Funcion para iniciar todo
-async function init() {
-    const pokeList = await listaPokemones();
-
-    if (pokeList) {
-        procesarPokedex(pokeList);
+        datosRecibidos.results.forEach(tipo => {
+            const option = document.createElement('option');
+            option.value = tipo.name;
+            option.textContent = tipo.name;
+            selectTipo.appendChild(option);
+        })
+    } catch (error) {
+        console.error(`Error al cargar la lista de tipos: ${error}`);
     }
 }
 
-cargarTipos();
-init()
+// ======= Funcion de inicio ======= //
+async function init() {
+    extraerTipos();
+
+    todosLosPokemones = await listaPokemones(limitePokemon) || [];
+
+    pokemonesFiltrados = [...todosLosPokemones];
+
+    imprimirPokedex();
+}
+
+init();
