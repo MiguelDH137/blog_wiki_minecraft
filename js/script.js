@@ -1,18 +1,20 @@
 // ======= variables globales ======= //
 let todosLosPokemones = []; // Arreglo para guardar la lista completa de la API
 let pokemonesFiltrados = []; // Copia del arreglo original para filtros y paginacion
-const limitePokemon = 1351;
+const limitePokemon = 100;
 
 // variables de paginacion
 let pagina = 1; // pagina actual
 const paginaLimite = 20; // limite de elementos por pagina
 
-
-// ======= Evento de paginacion =======//
+// ====== Elementos del DOM ====== //
+const pokeTargets = document.getElementById('pokeTargets');
+const selectTipo = document.getElementById('selectTipo');
+const inputBusqueda = document.getElementById('inputBusqueda');
 const btnSiguiente = document.getElementById('btnSiguiente');
 const btnAnterior = document.getElementById('btnAnterior');
 
-// ======= Eventos de paginacion ======= //
+// ======= Evento de paginacion =======//
 btnSiguiente.addEventListener('click', () => {
     const totalPaginas = Math.ceil(pokemonesFiltrados.length / paginaLimite);
     if (pagina < totalPaginas) {
@@ -76,7 +78,6 @@ const listaPokemones = async(limitePokemon) => {
 
 // ======= Funcion para mostrar y limitar en el html
 function imprimirPokedex() {
-    const pokeTargets = document.getElementById('pokeTargets');
     pokeTargets.innerHTML = '';
 
     // calculo para el rango de elemento que extraera slice()
@@ -93,33 +94,48 @@ function imprimirPokedex() {
         }
         
         pokeCards += `
-            <div>
-            <img src="${pokemon.image}" alt="imagen de ${pokemon.name}">
-            
-            <h3>N: ${pokemon.id} Nombre: ${pokemon.name}</h3>
-            </div>
-            <div class="typesLine">
-                ${tiposHTML}
+            <div class="pokeTarjeta">
+                <div class="typesLine">
+                    ${tiposHTML}
+                </div>
+                <div >
+                    <img src="${pokemon.image}" alt="imagen de ${pokemon.name}">
+                </div>
+
+                <div class="pokeInfo">
+                    <h3>N: ${pokemon.id} <br> Nombre: ${pokemon.name}</h3>
+                </div>    
             </div>
         `
     })
     pokeTargets.innerHTML = pokeCards;
 }
 
-// Evento para filtrar
-const selectTipo = document.getElementById('selectTipo');
-selectTipo.addEventListener('change', (e) => {
-    const tipoSeleccionado = e.target.value;
-    pagina = 1;
-    
-    if (tipoSeleccionado === 'Todos') {
-        pokemonesFiltrados = [...todosLosPokemones];
-    } else {
-        pokemonesFiltrados = todosLosPokemones.filter(pokemon => pokemon.types.includes(tipoSeleccionado));
-    }
+// ====== Funcion para filtrar ====== //
+function aplicarFiltros() {
 
+    const tipoSeleccionado = selectTipo.value;
+    const textoBusqueda = inputBusqueda.value;
+
+    pagina = 1;
+
+    pokemonesFiltrados = todosLosPokemones.filter(pokemon => {
+        const coincideTipo = (tipoSeleccionado === 'Todos') || pokemon.types.includes(tipoSeleccionado);
+
+        const coincideNombre = pokemon.name.includes(textoBusqueda);
+
+        const coincideId = pokemon.id.toString().includes(textoBusqueda)
+        
+        const coincidebusqueda = coincideNombre || coincideId
+
+        return coincideTipo && coincidebusqueda;
+    });
     imprimirPokedex();
-})
+}
+
+// ======= Eventos de Filtro y Búsqueda ======= //
+selectTipo.addEventListener('change', aplicarFiltros);
+inputBusqueda.addEventListener('input', aplicarFiltros);
 
 // ======= Funcion para extraer tipos del endpoint ======= //
 async function extraerTipos() {

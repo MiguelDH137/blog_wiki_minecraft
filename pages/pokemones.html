@@ -3,25 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokedex</title>
+    <title>Pokedex - Wiki</title>
+    <link rel="stylesheet" href="../styles/pokemones.css">
 </head>
 <body>
 
-    <div class="filtros">
-        <select id="selectTipo">
-            <option value="Todos">Todos los tipos</option>
-        </select>
-    </div>
-    
-    <div id="pokeTargets">
-        <!-- Tarjetas de pokemones -->
+    <!-- Seccion Navbar -->
+    <header class="header">
+        <!-- 1. Logo Pokébola (Izquierda) -->
+        <a href="#" class="logo-container">
+            <img src="../assets/pokeball.png" alt="Logo Pokébola" class="logo-img">
+        </a>
+
+        <!-- 2. Íconos de Navegación (Derecha) -->
+        <nav class="nav-buttons">
+
+            <button class="btn-icon" aria-label="Inicio">
+                <a href="../index.html">
+                    <img src="../assets/home.png" alt="Inicio">
+                </a>
+            </button>
+
+            <button class="btn-icon" aria-label="Buscar">
+                <a href="#inputBusqueda">
+                    <img src="../assets/buscar.png" alt="Buscar">
+                </a>
+            </button>
+
+            <button class="btn-icon" aria-label="Modo Claro/Oscuro">
+                <img src="../assets/modo_claro.png" alt="Tema">
+            </button>
+
+        </nav>
+    </header>
+
+    <div class="layout-container">
+        <!-- 2. SECCIÓN DESTACADA / HERO -->
+        <section class="hero-section">
+            <div class="hero-card">
+                <img src="../assets/pokedex_letras.png" alt="pokedes logo">
+            </div>
+            <div class="hero-description">
+                <p>Explora la enciclopedia completa con filtros en tiempo real y estadísticas de la PokeAPI.</p>
+            </div>
+        </section>
+
+        <!-- 3. SECCIÓN PRINCIPAL DE POKÉMON -->
+        <main class="main-catalog">
+            <!-- BARRA DE FILTROS Y BÚSQUEDA -->
+            <div class="filtros-bar">
+                <label for="selectTipo" class="filtro-label">Filtros:</label>
+                <select id="selectTipo">
+                    <option value="Todos">Todos los tipos</option>
+                </select>
+
+                <div class="search-box">
+                    <input type="text" id="inputBusqueda">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+
+            <!-- TARJETAS DE POKÉMON (GRID DE 3 COLUMNAS) -->
+            <div id="pokeTargets" class="poke-grid">
+                <!-- Se inyectan dinámicamente con JS -->
+            </div>
+
+            <!-- PAGINACIÓN -->
+            <div class="paginacion">
+                <button id="btnAnterior">Página Anterior</button>
+                <button id="btnSiguiente">Página Siguiente</button>
+            </div>
+        </main>
     </div>
 
-    <div class="paginacion">
-        <button id="btnAnterior">Pagina Anterior</button>
-        <button id="btnSiguiente">Pagina Siguiente</button>
-    </div>
-
+    <!-- 4. PIE DE PÁGINA / FOOTER -->
+    <footer class="footer">
+        <p>Desarrollado Por MiguelDM137</p>
+    </footer>
 
     <script src="../js/script.js"></script>
 </body>
